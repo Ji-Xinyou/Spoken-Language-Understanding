@@ -1,5 +1,7 @@
 #coding=utf8
-import os, json
+import json
+import os
+
 PAD = '<pad>'
 UNK = '<unk>'
 BOS = '<s>'
@@ -23,18 +25,18 @@ class Vocab():
             self.from_train(filepath, min_freq=min_freq)
 
     def from_train(self, filepath, min_freq=1):
-        with open(filepath, 'r') as f:
+        with open(filepath, 'r', encoding='utf-8') as f:
             trains = json.load(f)
-        word_freq = {}
-        for data in trains:
-            for utt in data:
-                text = utt['manual_transcript']
-                for char in text:
-                    word_freq[char] = word_freq.get(char, 0) + 1
-        for word in word_freq:
-            if word_freq[word] >= min_freq:
-                idx = len(self.word2id)
-                self.word2id[word], self.id2word[idx] = idx, word
+            word_freq = {}
+            for data in trains:
+                for utt in data:
+                    text = utt['manual_transcript']
+                    for char in text:
+                        word_freq[char] = word_freq.get(char, 0) + 1
+            for word in word_freq:
+                if word_freq[word] >= min_freq:
+                    idx = len(self.word2id)
+                    self.word2id[word], self.id2word[idx] = idx, word
 
     def __len__(self):
         return len(self.word2id)
@@ -59,7 +61,7 @@ class LabelVocab():
         self.from_filepath(root)
 
     def from_filepath(self, root):
-        ontology = json.load(open(os.path.join(root, 'ontology.json'), 'r'))
+        ontology = json.load(open(os.path.join(root, 'ontology.json'), 'r', encoding='utf-8'))
         acts = ontology['acts']
         slots = ontology['slots']
 

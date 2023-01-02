@@ -1,16 +1,21 @@
 #coding=utf8
-import sys, os, time, gc
+import gc
+import os
+import sys
+import time
+
 from torch.optim import Adam
+from tqdm import tqdm
 
 install_path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(install_path)
 
-from utils.args import init_args
-from utils.initialization import *
-from utils.example import Example
-from utils.batch import from_example_list
-from utils.vocab import PAD
 from model.slu_baseline_tagging import SLUTagging
+from utils.args import init_args
+from utils.batch import from_example_list
+from utils.example import Example
+from utils.initialization import *
+from utils.vocab import PAD
 
 # initialization params, output path, logger, random seed and torch.device
 args = init_args(sys.argv[1:])
@@ -77,7 +82,7 @@ if not args.testing:
     nsamples, best_result = len(train_dataset), {'dev_acc': 0., 'dev_f1': 0.}
     train_index, step_size = np.arange(nsamples), args.batch_size
     print('Start training ......')
-    for i in range(args.max_epoch):
+    for i in tqdm(range(args.max_epoch)):
         start_time = time.time()
         epoch_loss = 0
         np.random.shuffle(train_index)
