@@ -78,12 +78,18 @@ def decode(choice):
 
 
 if not args.testing:
-    num_training_steps = ((len(train_dataset) + args.batch_size - 1) // args.batch_size) * args.max_epoch
+    num_training_steps = \
+        ((len(train_dataset) + args.batch_size - 1) // args.batch_size) * args.max_epoch
     print('Total training steps: %d' % (num_training_steps))
+
     optimizer = set_optimizer(model, args)
+
     nsamples, best_result = len(train_dataset), {'dev_acc': 0., 'dev_f1': 0.}
     train_index, step_size = np.arange(nsamples), args.batch_size
+
     print('Start training ......')
+    torch.cuda.empty_cache()
+    gc.collect()
     for i in tqdm(range(args.max_epoch)):
         start_time = time.time()
         epoch_loss = 0
@@ -107,8 +113,9 @@ if not args.testing:
               Training Loss: %.4f' \
               % (i, time.time() - start_time, epoch_loss / count))
 
-        torch.cuda.empty_cache()
-        gc.collect()
+        # open if have low memory
+        # torch.cuda.empty_cache()
+        # gc.collect()
 
         start_time = time.time()
         metrics, dev_loss = decode('dev')
