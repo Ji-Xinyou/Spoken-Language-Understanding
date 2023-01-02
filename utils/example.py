@@ -15,31 +15,39 @@ class Example():
 
     @classmethod
     def load_dataset(cls, data_path):
-        datas = json.load(open(data_path, 'r', encoding='utf-8'))
         examples = []
+        datas = json.load(open(data_path, 'r', encoding='utf-8'))
+
         for data in datas:
             for utt in data:
                 ex = cls(utt)
                 examples.append(ex)
+
         return examples
 
     def __init__(self, ex: dict):
         super(Example, self).__init__()
         self.ex = ex
-
+        # utt is the input seq with noise
         self.utt = ex['asr_1best']
         self.slot = {}
+
         for label in ex['semantic']:
             act_slot = f'{label[0]}-{label[1]}'
             if len(label) == 3:
                 self.slot[act_slot] = label[2]
+
         self.tags = ['O'] * len(self.utt)
+
         for slot in self.slot:
             value = self.slot[slot]
             bidx = self.utt.find(value)
             if bidx != -1:
                 self.tags[bidx: bidx + len(value)] = [f'I-{slot}'] * len(value)
                 self.tags[bidx] = f'B-{slot}'
+
+        # self.slot stores K: 'act-slot', V: 'value'
+        # Hence self.slotvalue stores 'act-slot-value'
         self.slotvalue = [f'{slot}-{value}' for slot, value in self.slot.items()]
         self.input_idx = [Example.word_vocab[c] for c in self.utt]
         l = Example.label_vocab

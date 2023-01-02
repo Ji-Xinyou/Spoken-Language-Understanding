@@ -1,8 +1,10 @@
 #coding=utf8
 
 import numpy as np
-from utils.vocab import PAD, UNK
 import torch
+
+from utils.vocab import PAD, UNK
+
 
 class Word2vecUtils():
 
