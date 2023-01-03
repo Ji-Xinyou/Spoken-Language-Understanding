@@ -10,7 +10,7 @@ from tqdm import tqdm
 install_path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(install_path)
 
-from model.focus import FocusModel
+from model.twolstm import TwoLSTM
 from model.slu_baseline_tagging import SLUTagging
 from utils.args import init_args
 from utils.batch import from_example_list
@@ -45,8 +45,8 @@ args.tag_pad_idx = Example.label_vocab.convert_tag_to_idx(PAD)
 
 if args.model == 'baseline':
     model = SLUTagging(args).to(device)
-elif args.model == 'focus':
-    model = FocusModel(args).to(device)
+elif args.model == 'twolstm':
+    model = TwoLSTM(args).to(device)
 else:
     raise ValueError("args.model is invalid")
 

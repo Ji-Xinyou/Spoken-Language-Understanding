@@ -6,7 +6,7 @@ from model.slu_baseline_tagging import TaggingFNNDecoder
 from utils.batch import Batch
 
 '''
-An implementation of a Focus-like model, some revisions from the original paper.
+An implementation of a two-lstm model, revised from focus
 
 1. This model first passes the sequence to a bidirectional Recurrent NN(GRU, LSTM, ...)
 
@@ -20,15 +20,15 @@ An implementation of a Focus-like model, some revisions from the original paper.
 NOTE: the decode() method is exactly the same as the baseline model
 '''
 
-class FocusModel(nn.Module):
+class TwoLSTM(nn.Module):
     '''
-    The Focus Model for SLU.
+    A Focus-like Two Lstm Model for SLU.
     Must have in cfg:
         vocab_size, embed_size, hidden_size, num_layer, dropout, tag_pad_idx, num_tags
     '''
 
     def __init__(self, cfg):
-        super(FocusModel, self).__init__()
+        super(TwoLSTM, self).__init__()
         self.cfg = cfg
         # always embed the word first
         self.word_embed = nn.Embedding(cfg.vocab_size, cfg.embed_size, padding_idx=0)
