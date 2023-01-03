@@ -12,6 +12,7 @@ sys.path.append(install_path)
 
 from model.twolstm import TwoLSTM
 from model.slu_baseline_tagging import SLUTagging
+from model.focus import FocusModel
 from utils.args import init_args
 from utils.batch import from_example_list
 from utils.example import Example
@@ -45,12 +46,15 @@ args.tag_pad_idx = Example.label_vocab.convert_tag_to_idx(PAD)
 
 if args.model == 'baseline':
     model = SLUTagging(args).to(device)
+    Example.word2vec.load_embeddings(model.word_embed, Example.word_vocab, device=device)
 elif args.model == 'twolstm':
     model = TwoLSTM(args).to(device)
+    Example.word2vec.load_embeddings(model.word_embed, Example.word_vocab, device=device)
+elif args.model == 'focus':
+    model = FocusModel(args).to(device)
+    Example.word2vec.load_embeddings(model.word_embed, Example.word_vocab, device=device)
 else:
     raise ValueError("args.model is invalid")
-
-Example.word2vec.load_embeddings(model.word_embed, Example.word_vocab, device=device)
 
 
 def set_optimizer(model, args):
@@ -114,11 +118,11 @@ if not args.testing:
             optimizer.zero_grad()
             count += 1
 
-        # print('Training: \t \
-        #       Epoch: %d\t \
-        #       Time: %.4f\t \
-        #       Training Loss: %.4f' \
-        #       % (i, time.time() - start_time, epoch_loss / count))
+        print('Training: \t \
+              Epoch: %d\t \
+              Time: %.4f\t \
+              Training Loss: %.4f' \
+              % (i, time.time() - start_time, epoch_loss / count))
 
         # open if have low memory
         # torch.cuda.empty_cache()
@@ -128,12 +132,12 @@ if not args.testing:
         metrics, dev_loss = decode('dev')
         dev_acc, dev_fscore = metrics['acc'], metrics['fscore']
 
-        # print('Evaluation: \t \
-        #       Epoch: %d\t \
-        #       Time: %.4f\t \
-        #       Dev acc: %.2f\t \
-        #       Dev fscore(p/r/f): (%.2f/%.2f/%.2f)' \
-        #       % (i, time.time() - start_time, dev_acc, dev_fscore['precision'], dev_fscore['recall'], dev_fscore['fscore']))
+        print('Evaluation: \t \
+              Epoch: %d\t \
+              Time: %.4f\t \
+              Dev acc: %.2f\t \
+              Dev fscore(p/r/f): (%.2f/%.2f/%.2f)' \
+              % (i, time.time() - start_time, dev_acc, dev_fscore['precision'], dev_fscore['recall'], dev_fscore['fscore']))
 
         if dev_acc > best_result['dev_acc']:
             best_result['dev_loss'], best_result['dev_acc'], \
