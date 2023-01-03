@@ -10,6 +10,7 @@ from tqdm import tqdm
 install_path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(install_path)
 
+from model.focus import FocusModel
 from model.slu_baseline_tagging import SLUTagging
 from utils.args import init_args
 from utils.batch import from_example_list
@@ -42,7 +43,13 @@ args.pad_idx = Example.word_vocab[PAD]
 args.tag_pad_idx = Example.label_vocab.convert_tag_to_idx(PAD)
 
 
-model = SLUTagging(args).to(device)
+if args.model == 'baseline':
+    model = SLUTagging(args).to(device)
+elif args.model == 'focus':
+    model = FocusModel(args).to(device)
+else:
+    raise ValueError("args.model is invalid")
+
 Example.word2vec.load_embeddings(model.word_embed, Example.word_vocab, device=device)
 
 
@@ -107,11 +114,11 @@ if not args.testing:
             optimizer.zero_grad()
             count += 1
 
-        print('Training: \t \
-              Epoch: %d\t \
-              Time: %.4f\t \
-              Training Loss: %.4f' \
-              % (i, time.time() - start_time, epoch_loss / count))
+        # print('Training: \t \
+        #       Epoch: %d\t \
+        #       Time: %.4f\t \
+        #       Training Loss: %.4f' \
+        #       % (i, time.time() - start_time, epoch_loss / count))
 
         # open if have low memory
         # torch.cuda.empty_cache()
@@ -121,12 +128,12 @@ if not args.testing:
         metrics, dev_loss = decode('dev')
         dev_acc, dev_fscore = metrics['acc'], metrics['fscore']
 
-        print('Evaluation: \t \
-              Epoch: %d\t \
-              Time: %.4f\t \
-              Dev acc: %.2f\t \
-              Dev fscore(p/r/f): (%.2f/%.2f/%.2f)' \
-              % (i, time.time() - start_time, dev_acc, dev_fscore['precision'], dev_fscore['recall'], dev_fscore['fscore']))
+        # print('Evaluation: \t \
+        #       Epoch: %d\t \
+        #       Time: %.4f\t \
+        #       Dev acc: %.2f\t \
+        #       Dev fscore(p/r/f): (%.2f/%.2f/%.2f)' \
+        #       % (i, time.time() - start_time, dev_acc, dev_fscore['precision'], dev_fscore['recall'], dev_fscore['fscore']))
 
         if dev_acc > best_result['dev_acc']:
             best_result['dev_loss'], best_result['dev_acc'], \
@@ -151,6 +158,15 @@ if not args.testing:
           Dev acc: %.4f\t \
           Dev fscore(p/r/f): (%.4f/%.4f/%.4f)' \
           % (best_result['iter'], best_result['dev_loss'], best_result['dev_acc'], best_result['dev_f1']['precision'], best_result['dev_f1']['recall'], best_result['dev_f1']['fscore']))
+    
+    with open('experiments.log', 'a+') as f:
+        s = f'{args.model}\t\t{args.batch_size}\t\t{args.lr}\t\t{args.max_epoch}\t\t' + \
+            f'{args.encoder_cell}\t\t{args.dropout}\t\t\t{args.embed_size}\t\t\t\t' + \
+            f'{args.hidden_size}\t\t\t{args.num_layer}\t\t\t' \
+            '%.4f\t\t' % best_result['dev_acc']
+        s += '(%.2f/%.2f/%.2f)' % (best_result['dev_f1']['precision'], best_result['dev_f1']['recall'], best_result['dev_f1']['fscore'])
+        f.write(s + '\n')
+
 else:
     start_time = time.time()
     metrics, dev_loss = decode('dev')

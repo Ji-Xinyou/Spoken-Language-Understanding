@@ -40,6 +40,7 @@ class SLUTagging(nn.Module):
             pred_tuple = []
             idx_buff, tag_buff, pred_tags = [], [], []
             pred = pred[:len(batch.utt[i])]
+
             for idx, tid in enumerate(pred):
                 tag = label_vocab.convert_idx_to_tag(tid)
                 pred_tags.append(tag)
@@ -54,11 +55,13 @@ class SLUTagging(nn.Module):
                 elif tag.startswith('I') or tag.startswith('B'):
                     idx_buff.append(idx)
                     tag_buff.append(tag)
+
             if len(tag_buff) > 0:
                 slot = '-'.join(tag_buff[0].split('-')[1:])
                 value = ''.join([batch.utt[i][j] for j in idx_buff])
                 pred_tuple.append(f'{slot}-{value}')
             predictions.append(pred_tuple)
+
         return predictions, labels, loss.cpu().item()
 
 
@@ -72,6 +75,7 @@ class TaggingFNNDecoder(nn.Module):
 
     def forward(self, hiddens, mask, labels=None):
         logits = self.output_layer(hiddens)
+        # make masked value extremely small
         logits += (1 - mask).unsqueeze(-1).repeat(1, 1, self.num_tags) * -1e32
         prob = torch.softmax(logits, dim=-1)
         if labels is not None:
