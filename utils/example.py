@@ -1,8 +1,9 @@
 import json
 
-from utils.vocab import Vocab, LabelVocab
-from utils.word2vec import Word2vecUtils
 from utils.evaluator import Evaluator
+from utils.vocab import LabelVocab, Vocab
+from utils.word2vec import Word2vecUtils
+
 
 class Example():
 
@@ -48,7 +49,8 @@ class Example():
 
         # self.slot stores K: 'act-slot', V: 'value'
         # Hence self.slotvalue stores 'act-slot-value'
-        self.slotvalue = [f'{slot}-{value}' for slot, value in self.slot.items()]
+        self.slotvalue = [f'{slot}-{value}' for slot,
+                          value in self.slot.items()]
         self.input_idx = [Example.word_vocab[c] for c in self.utt]
         l = Example.label_vocab
         self.tag_id = [l.convert_tag_to_idx(tag) for tag in self.tags]
