@@ -12,6 +12,7 @@ sys.path.append(install_path)
 
 from model.twolstm import TwoLSTM
 from model.slu_baseline_tagging import SLUTagging
+from model.bert import Bert
 from model.focus import FocusModel
 from utils.args import init_args
 from utils.batch import from_example_list
@@ -28,12 +29,14 @@ print("Random seed is set to %d" % (args.seed))
 print("Use GPU with index %s" % (args.device) if args.device >= 0 else "Use CPU as target torch device")
 
 start_time = time.time()
-train_path = os.path.join(args.dataroot, 'train.json')
+train_path = os.path.join(args.dataroot, args.tr_filename)
 dev_path = os.path.join(args.dataroot, 'development.json')
 
 Example.configuration(args.dataroot, train_path=train_path, word2vec_path=args.word2vec_path)
 
+print("loading train dataset")
 train_dataset = Example.load_dataset(train_path)
+print("loading dev dataset")
 dev_dataset = Example.load_dataset(dev_path)
 print("Load dataset and database finished, cost %.4fs ..." % (time.time() - start_time))
 print("Dataset size: train -> %d ; dev -> %d" % (len(train_dataset), len(dev_dataset)))
@@ -43,7 +46,7 @@ args.num_tags = Example.label_vocab.num_tags
 args.pad_idx = Example.word_vocab[PAD]
 args.tag_pad_idx = Example.label_vocab.convert_tag_to_idx(PAD)
 
-
+print("Loading models")
 if args.model == 'baseline':
     model = SLUTagging(args).to(device)
     Example.word2vec.load_embeddings(model.word_embed, Example.word_vocab, device=device)
@@ -53,8 +56,11 @@ elif args.model == 'twolstm':
 elif args.model == 'focus':
     model = FocusModel(args).to(device)
     Example.word2vec.load_embeddings(model.word_embed, Example.word_vocab, device=device)
+elif args.model == 'bert':
+    model = Bert(args, device).to(device)
 else:
     raise ValueError("args.model is invalid")
+print("Model loaded")
 
 
 def set_optimizer(model, args):

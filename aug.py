@@ -5,7 +5,7 @@ import copy
 import random
 import os
 
-factor = 10
+factor = 2
 
 # open lexicons
 poi_path = os.path.join('data', 'lexicon', 'poi_name.txt')
