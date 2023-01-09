@@ -274,13 +274,10 @@ if __name__ == "__main__":
     arg_parser.add_argument('--f3', default=1, type=int, help='augmentation factor')
     arg_parser.add_argument('--f4', default=1, type=int, help='augmentation factor')
     arg_parser.add_argument('--noise', action='store_true', help='')
-    arg_parser.add_argument('--gen', action='store_true', help='whether to generate samples, the performance is not good')
     arg_parser.add_argument('--seed', default=42, help='')
     arg_parser.add_argument('--check_size', action='store_true', help='whether to check the size of the dataset only')
     args = arg_parser.parse_args()
 
     random.seed(args.seed)
 
-    # filename = f'aug_train_{args.factor}.json'
-    # main(args, filename)
     customize_main(args, args.f1, args.f2, args.f3, args.f4)

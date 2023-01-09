@@ -183,14 +183,6 @@ if not args.testing:
           Dev fscore(p/r/f): (%.4f/%.4f/%.4f)' \
           % (best_result['iter'], best_result['dev_loss'], best_result['dev_acc'], best_result['dev_f1']['precision'], best_result['dev_f1']['recall'], best_result['dev_f1']['fscore']))
     
-    with open('experiments.log', 'a+') as f:
-        s = f'{args.model}\t\t{args.batch_size}\t\t{args.lr}\t\t{args.max_epoch}\t\t' + \
-            f'{args.encoder_cell}\t\t{args.dropout}\t\t\t{args.embed_size}\t\t\t\t' + \
-            f'{args.hidden_size}\t\t\t{args.num_layer}\t\t\t' \
-            '%.4f\t\t' % best_result['dev_acc']
-        s += '(%.2f/%.2f/%.2f)' % (best_result['dev_f1']['precision'], best_result['dev_f1']['recall'], best_result['dev_f1']['fscore'])
-        f.write(s + '\n')
-
 else:
     start_time = time.time()
     metrics, dev_loss = decode('dev')
