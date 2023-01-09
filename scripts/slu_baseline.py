@@ -13,7 +13,9 @@ sys.path.append(install_path)
 from model.twolstm import TwoLSTM
 from model.slu_baseline_tagging import SLUTagging
 from model.bert import Bert
+from model.bertlstm import BertLSTM
 from model.focus import FocusModel
+from model.baselinemlp import SLUTaggingTest
 from utils.args import init_args
 from utils.batch import from_example_list
 from utils.example import Example
@@ -50,6 +52,9 @@ print("Loading models")
 if args.model == 'baseline':
     model = SLUTagging(args).to(device)
     Example.word2vec.load_embeddings(model.word_embed, Example.word_vocab, device=device)
+elif args.model == 'baselinemlp':
+    model = SLUTaggingTest(args).to(device)
+    Example.word2vec.load_embeddings(model.word_embed, Example.word_vocab, device=device)
 elif args.model == 'twolstm':
     model = TwoLSTM(args).to(device)
     Example.word2vec.load_embeddings(model.word_embed, Example.word_vocab, device=device)
@@ -58,6 +63,8 @@ elif args.model == 'focus':
     Example.word2vec.load_embeddings(model.word_embed, Example.word_vocab, device=device)
 elif args.model == 'bert':
     model = Bert(args, device).to(device)
+elif args.model == 'bertlstm':
+    model = BertLSTM(args, device).to(device)
 else:
     raise ValueError("args.model is invalid")
 print("Model loaded")
@@ -92,6 +99,13 @@ def decode(choice):
     torch.cuda.empty_cache()
     gc.collect()
     return metrics, total_loss / count
+
+if args.testout:
+    test_path = os.path.join(args.dataroot, 'test_unlabelled.json')
+    model_path = args.model_path
+    model_dict = torch.load(open(model_path, 'rb'), map_location=device)
+    model = model_dict['model']
+    exit(0)
 
 
 if not args.testing:

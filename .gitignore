@@ -8,6 +8,7 @@ __pycache__/
 
 # model.bin
 *.bin
+model/*
 
 # Distribution / packaging
 .Python

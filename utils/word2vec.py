@@ -27,6 +27,8 @@ class Word2vecUtils():
         return 1 - outliers / float(len(vocab))
 
     def read_from_file(self, word2vec_file):
+        if word2vec_file is None:
+            return
         with open(word2vec_file, 'r', encoding='utf-8') as f:
             for line in f:
                 line = line.strip('\n')

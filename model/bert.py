@@ -21,8 +21,9 @@ class Bert(nn.Module):
         super(Bert, self).__init__()
         self.cfg = cfg
         self.device = device
-        self.tokenizer = BertTokenizer.from_pretrained('bert-base-chinese')
-        self.model = BertModel.from_pretrained('./model/bert-base-chinese')
+        self.tokenizer = BertTokenizer.from_pretrained(cfg.berttype)
+        # download the model to local dir
+        self.model = BertModel.from_pretrained(f'./model/{cfg.berttype}')
         self.dropout = nn.Dropout(cfg.dropout)
         self.fc = TaggingFNNDecoder(768, cfg.num_tags, cfg.tag_pad_idx)
     
@@ -50,7 +51,6 @@ class Bert(nn.Module):
             tmp = torch.zeros(embed.shape[0], batch.tag_mask.shape[1], embed.shape[2]).to(self.device)
             tmp[:, :_embed.shape[1], :] = _embed
             _embed = tmp
-            # print("after modificaition: ", _embed.shape)
 
         tag_output = self.fc(_embed, batch.tag_mask, batch.tag_ids)
         return tag_output
@@ -97,10 +97,12 @@ class TaggingFNNDecoder(nn.Module):
     def __init__(self, input_size, num_tags, pad_id):
         super(TaggingFNNDecoder, self).__init__()
         self.num_tags = num_tags
+        self.out1 = nn.Linear(input_size, input_size)
         self.output_layer = nn.Linear(input_size, num_tags)
         self.loss_fct = nn.CrossEntropyLoss(ignore_index=pad_id)
 
     def forward(self, hiddens, mask, labels=None):
+        hiddens = self.out1(hiddens)
         logits = self.output_layer(hiddens)
         # make masked value extremely small
         logits += (1 - mask).unsqueeze(-1).repeat(1, 1, self.num_tags) * -1e32
