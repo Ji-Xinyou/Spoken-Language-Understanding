@@ -247,7 +247,13 @@ def aug6(train, _ords, ops, pois, aug_factor):
             break
     return aug
     
-def customize_main(args, f1, f2, f3, f4):
+def customize_main(args):
+    f1, f2, f3, f4 = args.f1, args.f2, args.f3, args.f4
+    p = f'augmenting f1={f1}, f2={f2}, f3={f3}, f3={f4}'
+    if args.noise:
+        p += ", adding noise"
+    print(p)
+
     filename = f'aug_{f1}_{f2}_{f3}_{f4}_{args.noise}.json'
 
     aug_train = copy.deepcopy(train)
@@ -267,6 +273,8 @@ def customize_main(args, f1, f2, f3, f4):
         with open(os.path.join('data', filename), 'w', encoding='utf-8') as f:
             json.dump(aug_train, f, ensure_ascii=False)   
 
+    print(f'augmented data dumped to {filename}')
+
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser()   
     arg_parser.add_argument('--f1', default=1, type=int, help='augmentation factor')
@@ -280,4 +288,4 @@ if __name__ == "__main__":
 
     random.seed(args.seed)
 
-    customize_main(args, args.f1, args.f2, args.f3, args.f4)
+    customize_main(args)

@@ -164,10 +164,7 @@ if not args.testing:
             best_result['dev_f1'], best_result['iter'] \
             = dev_loss, dev_acc, dev_fscore, i
 
-            torch.save({
-                'epoch': i, 'model': model.state_dict(),
-                'optim': optimizer.state_dict(),
-            }, open('model.bin', 'wb'))
+            torch.save({'weight': model.state_dict()}, open('model.bin', 'wb'))
 
             print('NEW BEST MODEL: \
                   \tEpoch: %d\t \

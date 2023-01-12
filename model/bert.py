@@ -16,6 +16,9 @@ from utils.initialization import set_random_seed, set_torch_device
 from utils.vocab import PAD
 
 class Bert(nn.Module):
+    '''
+    A Pretrained Bert model with a simple classifier
+    '''
 
     def __init__(self, cfg, device):
         super(Bert, self).__init__()

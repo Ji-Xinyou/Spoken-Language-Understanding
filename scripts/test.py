@@ -17,16 +17,19 @@ from utils.vocab import PAD
 
 
 arg_parser = argparse.ArgumentParser()
+
+#! Arguments here also use the values from ./utils/args.py
 add_argument_base(arg_parser)
-arg_parser.add_argument('--model_path', default='model.bin', help='model path')
+arg_parser.add_argument('--model_path', default='./models_saved/weight.bin', help='model path')
+arg_parser.add_argument('--test_src', default='./data/test_unlabelled.json', help='test unlabelled path')
+
 args = arg_parser.parse_args()
 
 Example.configuration(args.dataroot, train_path=None, word2vec_path=None)
 
 device = set_torch_device(args.device)
 
-test_path = os.path.join(args.dataroot, 'test_unlabelled.json')
-test_dataset = Example.load_dataset(test_path)
+test_dataset = Example.load_dataset(args.test_src)
 
 print("Length of test dataset: %d" % (len(test_dataset)))
 
@@ -36,16 +39,20 @@ args.pad_idx = Example.word_vocab[PAD]
 args.tag_pad_idx = Example.label_vocab.convert_tag_to_idx(PAD)
 
 model_path = args.model_path
+print("loading weight from %s" % (model_path))
 model_dict = torch.load(open(model_path, 'rb'), map_location=device)
-state_dict = model_dict['model']
+
+state_dict = model_dict['weight']
 
 model = BertLSTM(args, device).to(device)
+print("\nloading state_dict to model")
 model.load_state_dict(state_dict)
 
 model.eval()
 
 result = []
 
+print("Start predicting")
 with torch.no_grad():
     current_batch = from_example_list(args, test_dataset, device, train=True)
     pred, label, loss = model.decode(Example.label_vocab, current_batch)
@@ -55,5 +62,7 @@ with torch.no_grad():
         data = [{"utt_id": 1, "asr_1best": current_batch.utt[j], "pred": [s.split('-') for s in pred[j]]}]
         result.append(data)
 
+print("Prediction done, dumping prediction to test.json")
 with open(os.path.join('test.json'), 'w', encoding='utf-8') as f:
     json.dump(result, f, ensure_ascii=False, indent=4)
+print("dumped")

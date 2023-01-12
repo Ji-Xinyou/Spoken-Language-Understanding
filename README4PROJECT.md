@@ -20,6 +20,7 @@
 |   README.md
 |   README4PROJECT.md  // 本文件
 |   word2vec-768.txt
+|   test.json  // 输出的预测结果
 |
 +---data
 |   |   development.json
@@ -33,20 +34,20 @@
 |           poi_name.txt
 |
 +---model
-|   |   baselinemlp.py  // NOTUSED: 本次Project的尝试，Baseline后的feedforward改为mlp，因为没有什么价值没有写入报告中。
+|   |   baselinemlp.py  // NOTUSEDNOTUSEDNOTUSED: 本次Project的尝试，Baseline后的feedforward改为mlp，因为没有什么价值没有写入报告中。
 |   |   bert.py         // Bert模型，使用了bert-base-chinese预训练模型
 |   |   bertlstm.py     // BertLSTM模型
-|   |   focus.py        // NOTUSED: 本次Project的尝试，尝试用生成式的方式建模，可能由于实现的原因效果较差，因此没有写入报告中。
+|   |   focus.py        // NOTUSEDNOTUSEDNOTUSED: 本次Project的尝试，尝试用生成式的方式建模，可能由于实现的原因效果较差，因此没有写入报告中。
 |   |   slu_baseline_tagging.py
-|   |   twolstm.py      // NOTUSED: 本次Proejct的尝试，尝试使用第一个lstm的encoding作为第二个lstm的输入，没有什么意义，因此没有写入报告中。
+|   |   twolstm.py      // NOTUSEDNOTUSEDNOTUSED: 本次Project的尝试，尝试使用第一个lstm的encoding作为第二个lstm的输入，没有什么意义，因此没有写入报告中。
 |   |
-|   +---bert-base-chinese  // 下载的预训练模型，放在此处因为本机无法正常从huggingface下载BertModel模型
+|   +---bert-base-chinese  // 下载的预训练模型，放在此处因为开发环境无法正常从huggingface下载BertModel模型
 |   |       config.json
 |   |       pytorch_model.bin
 |   |       vocab.txt
 |   |
-|   +---models_saved  // 最终提交的效果最好的模型，使用了BertLSTM, Dev Acc为80.17%
-|   |       bertlstm_3113_8017.bin
+|   +---models_saved  // 最终提交的效果最好的模型，使用了BertLSTM, Dev Acc为80.11%
+|   |       weight.bin
 |   |
 |
 +---scripts
@@ -108,17 +109,17 @@ python ./scripts/slu_baseline.py --model=bertlstm --lr=3e-5 --dropout=0.2 --tr_f
 
 运行方式如下
 ```sh
-python ./scripts/test.py --model_path MODEL_PATH
+python ./scripts/test.py --model_path MODEL_PATH --test_src TEST_SRC
 ```
 
-通过`MODEL_PATH`指定模型文件，本次提交的模型为`./models_saved/bertlstm_3113_8017.bin`，运行如下命令会产生`test.json`在当前目录。
+通过`MODEL_PATH`指定模型文件，通过`TEST_SRC`指定unlabelled的测试文件，默认为`./data/test_unlabelled.json`，本次提交的模型为`./models_saved/weight.bin`(也为MODEL_PATH的默认值)，为BertLSTM的state_dict，运行如下命令会产生`test.json`在当前目录。
 
 ```sh
-python ./scripts/test.py --model_path ./models_saved/bertlstm_3113_8017.bin
+python ./scripts/test.py --model_path ./models_saved/weight.bin --test_src ./data/test_unlabelled.json
 ```
 ---
 ## 运行环境要求
 * torch, cuda能正常运行即可，huggingface的transformers库(引入Bert)。
 * 本次提交提供了bert模型在./model/bert-base-chinese中，在运行训练脚本时需要存在本地目录
-* 在运行脚本时，请不要开启proxy，否则bert tokenizer将无法从huggingface上被拉取
+* 在运行脚本时，**请不要开启proxy**，否则bert tokenizer将无法从huggingface上被拉取
 * 在运行测试脚本的时候，需要指定模型的路径，请保证模型的路径有效
